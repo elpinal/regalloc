@@ -26,7 +26,6 @@ neighbors : Graph -> String -> Maybe (List String)
 neighbors (MkGraph []) _ = Nothing
 neighbors (MkGraph ((n, ss) :: ps)) s = if getName n == s then Just ss else neighbors (MkGraph ps) s
 
--- If Graph is not empty, then it returns a Just-value.
 heaviest : (Maybe (Node, List String)) -> Graph -> Graph -> (Maybe (Node, List String), Graph, Graph)
 heaviest n (MkGraph []) g = (n, MkGraph [], g)
 heaviest mn (MkGraph ((n, ns) :: ps)) (MkGraph qs) =
