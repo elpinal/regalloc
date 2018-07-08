@@ -58,5 +58,3 @@ mcs g =
     case qq of
       Nothing => []
       Just (n, ns) => n :: mcs (incNeighbors ns g')
-
--- vim: ft=haskell
