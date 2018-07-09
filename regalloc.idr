@@ -1,5 +1,7 @@
 module Main
 
+import Data.SortedMap
+
 data Node = MkNode String Int
 
 Eq Node where
@@ -51,9 +53,34 @@ incNeighbors ns (MkGraph (p :: ps)) =
     f g = mapGraph (\x => g p :: x) $ incNeighbors ns $ MkGraph ps
 
 -- Maximum cardinality search
-mcs : Graph -> List Node
+mcs : Graph -> List (String, List String)
 mcs g =
   let (qq, _, g') = heaviest Nothing g (MkGraph []) in
     case qq of
       Nothing => []
-      Just (n, ns) => n :: mcs (incNeighbors ns g')
+      Just (n, ns) => (getName n, ns) :: mcs (incNeighbors ns g')
+
+Color : Type
+Color = Int
+
+lowest : List Color -> Color
+lowest = f 0 . sort
+  where
+    f : Int -> List Color -> Color
+    f n [] = n
+    f n (c :: cs) = if n /= c then n else f (n + 1) cs
+
+coloring' : List (String, List String) -> SortedMap String Color -> SortedMap String Color
+coloring' [] m = m
+coloring' ((name, ns) :: xs) m = coloring' xs $ insert name n m
+  where
+    f : List (Maybe a) -> List a
+    f [] = []
+    f (Nothing :: x) = f x
+    f (Just a :: x) = a :: f x
+
+    n : Color
+    n = lowest $ f $ map (\n => lookup n m) ns
+
+coloring : List (String, List String) -> SortedMap String Color
+coloring xs = coloring' xs empty
