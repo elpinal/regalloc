@@ -1,6 +1,7 @@
 module Main
 
 import Data.SortedMap
+import Data.SortedSet
 
 data Node = MkNode String Int
 
@@ -84,3 +85,22 @@ coloring' ((name, ns) :: xs) m = coloring' xs $ insert name n m
 
 coloring : List (String, List String) -> SortedMap String Color
 coloring xs = coloring' xs empty
+
+namespace instruction
+  data Inst = Mov String String | Add String String String
+
+  Graph : Type
+  Graph = SortedMap String (SortedSet String)
+
+  update : Ord a => k -> SortedMap k (SortedSet a) -> (SortedSet a -> SortedSet a) -> SortedMap k (SortedSet a)
+  update k m f = (\v => insert k v m) $ f $ fromMaybe empty $ lookup k m
+
+  interfere : String -> instruction.Graph -> SortedSet String -> instruction.Graph
+  interfere d g u = foldr (\x, acc => update x acc $ insert d) (update d g $ union u) u
+
+  buildGraph : List Inst -> instruction.Graph
+  buildGraph = snd . foldr (\i, acc => f i acc) (empty, empty)
+    where
+      f : Inst -> (SortedSet String, instruction.Graph) -> (SortedSet String, instruction.Graph)
+      f (Mov d s)     (u, g) = (insert s $ delete d u             , interfere d g $ delete s $ delete d u)
+      f (Add d s1 s2) (u, g) = (insert s2 $ insert s1 $ delete d u, interfere d g $ delete d u)
